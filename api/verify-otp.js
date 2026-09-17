@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-let activeBotTunnel = 'https://options-mood-annotated-prozac.trycloudflare.com';
+let activeBotTunnel = 'https://gnome-craig-grove-fat.trycloudflare.com';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
