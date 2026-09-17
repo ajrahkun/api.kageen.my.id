@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const STORE_URL = 'https://api.jsonbin.io/v3/b/66ea04a1acd3cb34a886d52f';
-const MASTER_KEY = '$2a$10$37aMpv34E7L18YlU92s4U.R4c8mK5Xf1P1W08lP1L8';
+let activeBotTunnel = 'https://moving-dinner-explicitly-anyway.trycloudflare.com/';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -10,54 +9,24 @@ export default async function handler(req, res) {
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
-    }
+    };
 
     if (req.query.update_bot) {
-        const newUrl = req.query.update_bot.replace(/\/+$/, '');
-        try {
-            await axios.put(
-                STORE_URL,
-                { bot_url: newUrl },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': MASTER_KEY
-                    }
-                }
-            );
-            return res.status(200).json({
-                success: true,
-                message: 'Bot URL berhasil disimpan permanen di Cloud!',
-                active_url: newUrl
-            });
-        } catch (e) {
-            return res.status(500).json({
-                success: false,
-                error: 'Gagal menyimpan ke storage: ' + e.message
-            });
-        }
-    }
-
-    let activeBotTunnel = '';
-    try {
-        const getRes = await axios.get(STORE_URL, {
-            headers: { 'X-Master-Key': MASTER_KEY },
-            timeout: 5000
-        });
-        activeBotTunnel = getRes.data?.record?.bot_url || '';
-    } catch (e) {}
-
-    if (!activeBotTunnel) {
-        activeBotTunnel = 'https://moving-dinner-explicitly-anyway.trycloudflare.com';
-    }
+        activeBotTunnel = req.query.update_bot.replace(/\/+$/, '');
+        return res.status(200).json({
+            success: true,
+            message: 'Bot URL berhasil diperbarui!',
+            active_url: activeBotTunnel
+        })
+    };
 
     if (req.method === 'GET') {
         return res.status(200).json({
             success: true,
             status: 'online',
             bot_endpoint: activeBotTunnel
-        });
-    }
+        })
+    };
 
     if (req.method === 'POST') {
         const { phone, code } = req.body;
@@ -66,8 +35,8 @@ export default async function handler(req, res) {
             return res.status(400).json({
                 success: false,
                 error: 'Nomor WhatsApp dan Kode OTP wajib diisi!'
-            });
-        }
+            })
+        };
 
         try {
             const response = await axios.post(
@@ -87,12 +56,12 @@ export default async function handler(req, res) {
             return res.status(status).json({
                 success: false,
                 error: errorMsg
-            });
+            })
         }
-    }
+    };
 
     return res.status(405).json({
         success: false,
         error: 'Method Not Allowed'
-    });
-}
+    })
+};
