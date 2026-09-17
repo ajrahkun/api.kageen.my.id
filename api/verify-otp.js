@@ -51,7 +51,7 @@ export default async function handler(req, res) {
             return res.status(response.status).json(response.data);
         } catch (err) {
             const status = err.response ? err.response.status : 500;
-            const errorMsg = err.response?.data?.error || 'Gagal menghubungi bot WhatsApp atau bot sedang offline.';
+            const errorMsg = err.response?.data?.error || 'Gagal menghubungi Bot WhatsApp.';
             
             return res.status(status).json({
                 success: false,
