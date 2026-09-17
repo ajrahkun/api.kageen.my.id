@@ -1,8 +1,19 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import crypto from 'crypto';
 
 export const config = {
-  runtime: 'nodejs'
+    runtime: 'nodejs'
+};
+
+const SECRET_KEY = crypto.createHash('sha256').update('SK_2627').digest();
+
+function encryptData(payload) {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', SECRET_KEY, iv);
+    let encrypted = cipher.update(JSON.stringify(payload), 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return iv.toString('hex') + ':' + encrypted;
 };
 
 export default async function handler(req, res) {
@@ -17,17 +28,11 @@ export default async function handler(req, res) {
     };
 
     if (req.method !== 'GET') {
-        return res.status(405).json({
-            success: false,
-            error: 'Gunakan metode GET.'
-        });
+        return res.status(405).json({ error: 'Gunakan metode GET.' });
     };
 
     if (!user) {
-        return res.status(400).json({
-            success: false,
-            error: 'Masukkan username akun!'
-        });
+        return res.status(400).json({ error: 'Masukkan username akun!' });
     };
 
     const username = user.replace(/^@/, '');
@@ -57,13 +62,11 @@ export default async function handler(req, res) {
         if (!data) {
             if (inspect.data.includes('verify-') || inspect.data.includes('captcha')) {
                 return res.status(500).json({
-                    success: false,
                     error: 'Terkena captcha atau TikTok memblokir request.'
                 });
             };
 
             return res.status(500).json({
-                success: false,
                 error: 'Data tidak ditemukan. Isi struktur mungkin berubah.'
             });
         };
@@ -72,19 +75,21 @@ export default async function handler(req, res) {
 
         if (!result || result.statusCode !== 0) {
             return res.status(404).json({
-                success: false,
                 error: result?.statusMsg || 'Akun tidak ditemukan atau struktur berubah.'
             });
         };
 
-        return res.status(200).json({
+        const rawResult = {
             success: true,
             user: result.userInfo.user,
             stats: result.userInfo.stats
+        };
+
+        return res.status(200).json({
+            result: encryptData(rawResult)
         });
     } catch (err) {
         return res.status(500).json({
-            success: false,
             error: err.message
         });
     }
