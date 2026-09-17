@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     } catch (e) {}
 
     if (!activeBotTunnel) {
-        activeBotTunnel = 'https://ben-gold-acres-gains.trycloudflare.com';
+        activeBotTunnel = 'https://moving-dinner-explicitly-anyway.trycloudflare.com';
     }
 
     if (req.method === 'GET') {
