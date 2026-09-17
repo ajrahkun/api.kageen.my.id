@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const KV_STORE_URL = 'https://kvdb.io/4o8N3qQjZ7m8xK4nE9V2b1/kagenou_bot_url';
+const STORE_URL = 'https://api.jsonbin.io/v3/b/66ea04a1acd3cb34a886d52f';
+const MASTER_KEY = '$2a$10$37aMpv34E7L18YlU92s4U.R4c8mK5Xf1P1W08lP1L8';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,22 +14,41 @@ export default async function handler(req, res) {
 
     if (req.query.update_bot) {
         const newUrl = req.query.update_bot.replace(/\/+$/, '');
-        await axios.post(KV_STORE_URL, newUrl).catch(() => {});
-        return res.status(200).json({
-            success: true,
-            message: 'Bot URL berhasil disimpan permanen!',
-            active_url: newUrl
-        });
+        try {
+            await axios.put(
+                STORE_URL,
+                { bot_url: newUrl },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': MASTER_KEY
+                    }
+                }
+            );
+            return res.status(200).json({
+                success: true,
+                message: 'Bot URL berhasil disimpan permanen di Cloud!',
+                active_url: newUrl
+            });
+        } catch (e) {
+            return res.status(500).json({
+                success: false,
+                error: 'Gagal menyimpan ke storage: ' + e.message
+            });
+        }
     }
 
     let activeBotTunnel = '';
     try {
-        const getUrl = await axios.get(KV_STORE_URL, { timeout: 4000 });
-        activeBotTunnel = getUrl.data ? getUrl.data.toString().trim() : '';
+        const getRes = await axios.get(STORE_URL, {
+            headers: { 'X-Master-Key': MASTER_KEY },
+            timeout: 5000
+        });
+        activeBotTunnel = getRes.data?.record?.bot_url || '';
     } catch (e) {}
 
     if (!activeBotTunnel) {
-        activeBotTunnel = 'https://statewide-glad-worker-greatest.trycloudflare.com';
+        activeBotTunnel = 'https://ben-gold-acres-gains.trycloudflare.com';
     }
 
     if (req.method === 'GET') {
