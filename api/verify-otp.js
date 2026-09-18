@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-let activeBotTunnel = 'https://literacy-instructors-witnesses-tokyo.trycloudflare.com';
+let activeBotTunnel = 'https://speaks-occur-speakers-wright.trycloudflare.com';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
