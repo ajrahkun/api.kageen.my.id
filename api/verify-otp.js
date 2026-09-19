@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-let activeBotTunnel = 'https://falls-were-federation-raw.trycloudflare.com';
+let activeBotTunnel = 'https://lock-libs-follows-congressional.trycloudflare.com';
 const TURNSTILE_SECRET_KEY = '0x4AAAAAAE7f-SFi2zqSl-4THBdLAoIYLYY';
 
 export default async function handler(req, res) {
