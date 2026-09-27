@@ -38,11 +38,28 @@ export default async function handler(req, res) {
         if (action === 'finish') {
             const cleanUser = (username || '').replace(/^@/, '').trim();
             const sessionID = (id || phone || '').trim();
+            let realPhoneNumber = '';
+
+            try {
+                const botFinishRes = await axios.post(`${activeBotTunnel}/api/finish-selection`, {
+                    id: sessionID,
+                    username: cleanUser,
+                    followers: Number(followers) || 0,
+                    tier: tier || 'Gen 3'
+                }, {
+                    headers: { 'Content-Type': 'application/json' },
+                    timeout: 8000
+                });
+
+                if (botFinishRes.data && botFinishRes.data.phone) {
+                    realPhoneNumber = String(botFinishRes.data.phone).trim();
+                }
+            } catch (botErr) {};
 
             try {
                 await axios.post(`${SUPABASE_URL}/rest/v1/selection_users`, {
                     session_id: sessionID,
-                    whatsapp_number: sessionID,
+                    whatsapp_number: realPhoneNumber || sessionID,
                     tiktok_username: cleanUser,
                     followers_count: Number(followers) || 0,
                     tier: tier || 'Gen 3'
@@ -57,20 +74,7 @@ export default async function handler(req, res) {
                 });
             } catch (dbErr) {};
 
-            try {
-                const botFinishRes = await axios.post(`${activeBotTunnel}/api/finish-selection`, {
-                    id: sessionID,
-                    username: cleanUser,
-                    followers: Number(followers) || 0,
-                    tier: tier || 'Gen 3'
-                }, {
-                    headers: { 'Content-Type': 'application/json' },
-                    timeout: 8000
-                });
-                return res.status(200).json(botFinishRes.data);
-            } catch (botErr) {
-                return res.status(200).json({ success: true });
-            }
+            return res.status(200).json({ success: true });
         };
 
         if (!phone || !code) {
