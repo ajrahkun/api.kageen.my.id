@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-let activeBotTunnel = 'https://salad-phantom-salaries-boundaries.trycloudflare.com';
+let activeBotTunnel = 'https://capability-rising-tablet-concord.trycloudflare.com';
 const TURNSTILE_SECRET_KEY = '0x4AAAAAAE7f-SFi2zqSl-4THBdLAoIYLYY';
 
 const SUPABASE_URL = 'https://vngwcbnbkbrbzlrhfhmk.supabase.co';
