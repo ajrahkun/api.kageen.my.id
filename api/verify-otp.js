@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-let activeBotTunnel = 'https://charles-labels-bag-lunch.trycloudflare.com/';
+let activeBotTunnel = 'https://wide-blogging-billy-stamps.trycloudflare.com';
 const TURNSTILE_SECRET_KEY = '0x4AAAAAAE7f-SFi2zqSl-4THBdLAoIYLYY';
 
 const SUPABASE_URL = 'https://vngwcbnbkbrbzlrhfhmk.supabase.co';
