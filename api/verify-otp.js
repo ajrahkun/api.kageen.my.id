@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-let activeBotTunnel = 'https://detect-investor-east-characterized.trycloudflare.com';
+let activeBotTunnel = 'https://bye-examinations-qld-saw.trycloudflare.com';
 const TURNSTILE_SECRET_KEY = '0x4AAAAAAE7f-SFi2zqSl-4THBdLAoIYLYY';
 
 const SUPABASE_URL = 'https://vngwcbnbkbrbzlrhfhmk.supabase.co';
